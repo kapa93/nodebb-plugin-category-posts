@@ -8,6 +8,12 @@
 		},
 		{
 			"hook": "filter:admin.header.build", "method": "addAdminNavigation"
+		},
+		{
+			"hook": "filter:widgets.getWidgets", "method": "defineWidgets"
+		},
+		{
+			"hook": "filter:widget.render:categoryPosts", "method": "renderWidget"
 		}
 	],
 	"staticDirs": {
