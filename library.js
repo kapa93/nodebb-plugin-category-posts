@@ -1,12 +1,15 @@
 'use strict';
 
 const controllers = require('./lib/controllers');
+var nconf = require.main.require('nconf');
+var async = require.main.require('async');
 
-const plugin = {};
+var plugin = module.exports;
+var router;
 
 plugin.init = function (params, callback) {
-	const router = params.router;
-	const hostMiddleware = params.middleware;
+	router = params.router;
+	var hostMiddleware = params.middleware;
 	// const hostControllers = params.controllers;
 
 	// We create two routes for every view. One API call, and the actual route itself.
@@ -14,6 +17,7 @@ plugin.init = function (params, callback) {
 
 	router.get('/admin/plugins/category-posts', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/category-posts', controllers.renderAdminPage);
+	router.get('/plugins/nodebb-plugin-category-posts/render', renderExternal);
 
 	callback();
 };
@@ -34,7 +38,7 @@ plugin.defineWidgets = function(widgets, callback) {
 		name: "Category Posts",
 		description: "List of categories with their posts.",
 	};
-	app.render('admin/plugins/nodebb-plugin-category-posts/widget', {}, function (err, html) {
+	router.render('admin/plugins/nodebb-plugin-category-posts/widget', {}, function (err, html) {
 		if (err) {
 			return callback(err);
 		}
@@ -57,13 +61,17 @@ plugin.renderWidget = function(widget, callback) {
 		cid: widget.data.cid || 0,
 	};
 
-	app.render('partials/nodebb-plugin-category-posts/header', data.templateData, function (err, html) {
+	router.render('partials/nodebb-plugin-category-posts/header', function (err, html) {
 		if (err) {
 			return callback(err);
 		}
 		widget.html = html;
 		callback(null, widget);
 	});
+}
+
+function renderExternal(req, res, next) {
+	res.render('partials/nodebb-plugin-recent-cards-min/header', data.templateData);
 }
 
 module.exports = plugin;

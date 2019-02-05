@@ -17,11 +17,15 @@ $(document).ready(function () {
 
 	var categories = [{name: 'catalytic', id: '5'}, {name: 'announcements', id: '1'}]
 
+	function getPosts(category) {
+	    $.ajax({url: 'http://localhost:4567/api/category/' + category.id + '/' + category.name, success: function(result){
+		  //$('#' + categories[i].name + '-cat').append(result);
+	      console.log(category.name + ":" + JSON.stringify(result));
+	  	}});
+	}
+
 	for (i = 0; i < categories.length; i++) {
-	  $.ajax({url: 'http://localhost:4567/api/category/' + categories[i].id + '/' + categories[i].name, success: function(result){
-	  	//$('#' + categories[i].name + '-cat').append(result);
-    	console.log(categories[i].name + ":" + result);
-  	}});
+	    getPosts(categories[i]);
 	}
 
 	console.log('nodebb-plugin-category-posts: loaded');
