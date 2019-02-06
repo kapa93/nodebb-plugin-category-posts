@@ -19,7 +19,7 @@ $(document).ready(function () {
 
 	function getPosts(category) {
 	    $.ajax({url: 'http://localhost:4567/api/category/' + category.id + '/' + category.name, success: function(result){
-		  //$('#' + categories[i].name + '-cat').append(result);
+		  	$('#' + category.name + '-cat').append(JSON.stringify(result));
 	      console.log(category.name + ":" + JSON.stringify(result));
 	  	}});
 	}

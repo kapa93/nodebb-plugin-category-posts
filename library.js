@@ -4,6 +4,11 @@ const controllers = require('./lib/controllers');
 var nconf = require.main.require('nconf');
 var async = require.main.require('async');
 
+var validator = require.main.require('validator');
+var topics = require.main.require('./src/topics');
+var settings = require.main.require('./src/settings');
+var groups = require.main.require('./src/groups');
+var socketAdmin = require.main.require('./src/socket.io/admin');
 var plugin = module.exports;
 var router;
 
@@ -71,7 +76,7 @@ plugin.renderWidget = function(widget, callback) {
 }
 
 function renderExternal(req, res, next) {
-	res.render('partials/nodebb-plugin-recent-cards-min/header', data.templateData);
+	res.render('partials/nodebb-plugin-category-posts/header');
 }
 
 module.exports = plugin;
