@@ -13,15 +13,17 @@ plugin.init = function (params, callback) {
   // We create two routes for every view. One API call, and the actual route itself.
   // Just add the buildHeader middleware to your route and NodeBB will take care of everything for you.
 
-  router.get('/admin/plugins/quickstart', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
-  router.get('/api/admin/plugins/quickstart', controllers.renderAdminPage);
+  router.get('/admin/plugins/categoryposts', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
+  router.get('/api/admin/plugins/categoryposts', controllers.renderAdminPage);
+
+  router.get('/plugins/nodebb-plugin-category-posts/render', renderExternal);
 
   callback();
 };
 
 plugin.addAdminNavigation = function (header, callback) {
   header.plugins.push({
-    route: '/plugins/category-posts',
+    route: '/plugins/categoryposts',
     icon: 'fa-tint',
     name: 'Category Posts',
   });
@@ -63,13 +65,30 @@ plugin.renderWidget = function(widget, callback) {
 			return callback(err);
 		}
 
-		app.render('partials/nodebb-plugin-category-posts/header', data.templateData, function (err, html) {
+		router.render('partials/nodebb-plugin-category-posts/header', data.templateData, function (err, html) {
 			if (err) {
 				return callback(err);
 			}
 			widget.html = html;
 			callback(null, widget);
 		});
+	});
+}
+
+function renderExternal(req, res, next) {
+	plugin.getCategories({
+		templateData: {}
+	}, function(err, data) {
+		if (err) {
+			return next(err);
+		}
+
+		data.templateData.relative_url = data.relative_url;
+		data.templateData.config = {
+			relative_path: nconf.get('url')
+		};
+
+		res.render('partials/nodebb-plugin-category-posts/header', data.templateData);
 	});
 }
 
