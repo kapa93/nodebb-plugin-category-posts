@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-category-posts",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "",
   "main": "library.js",
   "repository": {
