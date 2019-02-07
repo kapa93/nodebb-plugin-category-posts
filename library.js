@@ -69,7 +69,7 @@ plugin.renderWidget = function(widget, callback) {
 			return callback(err);
 		}
 		router.render('partials/nodebb-plugin-category-posts/header', {
-			categories: data.templateData,
+			categories: data,
 			relative_path: nconf.get('relative_path')
 		}, function (err, html) {
 			widget.html = html;
