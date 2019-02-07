@@ -1,58 +1,52 @@
 'use strict';
 
 const controllers = require('./lib/controllers');
-var nconf = require.main.require('nconf');
-var async = require.main.require('async');
-var categories = require.main.require('./src/categories');
-var validator = require.main.require('validator');
 var topics = require.main.require('./src/topics');
-var settings = require.main.require('./src/settings');
-var groups = require.main.require('./src/groups');
-var socketAdmin = require.main.require('./src/socket.io/admin');
-var plugin = module.exports;
-var router;
+
+const plugin = {};
 
 plugin.init = function (params, callback) {
-	router = params.router;
-	var hostMiddleware = params.middleware;
-	// const hostControllers = params.controllers;
+  const router = params.router;
+  const hostMiddleware = params.middleware;
+  // const hostControllers = params.controllers;
 
-	// We create two routes for every view. One API call, and the actual route itself.
-	// Just add the buildHeader middleware to your route and NodeBB will take care of everything for you.
+  // We create two routes for every view. One API call, and the actual route itself.
+  // Just add the buildHeader middleware to your route and NodeBB will take care of everything for you.
 
-	router.get('/plugins/nodebb-plugin-category-posts/render', renderExternal);
+  router.get('/admin/plugins/quickstart', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
+  router.get('/api/admin/plugins/quickstart', controllers.renderAdminPage);
 
-	callback();
+  callback();
 };
 
 plugin.addAdminNavigation = function (header, callback) {
-	header.plugins.push({
-		route: '/plugins/category-posts',
-		icon: 'fa-tint',
-		name: 'Category Posts',
-	});
+  header.plugins.push({
+    route: '/plugins/category-posts',
+    icon: 'fa-tint',
+    name: 'Category Posts',
+  });
 
-	callback(null, header);
+  callback(null, header);
 };
 
 plugin.defineWidgets = function(widgets, callback) {
-	var widget = {
-		widget: "categoryPosts",
-		name: "Category Posts",
-		description: "List of categories with their posts.",
-	};
-	router.render('admin/plugins/nodebb-plugin-category-posts/widget', {}, function (err, html) {
-		if (err) {
-			return callback(err);
-		}
-		widget.content = html;
-		widgets.push(widget);
-		callback(null, widgets);
-	});
+  var widget = {
+    widget: "categoryPosts",
+    name: "Category Posts",
+    description: "List of categories with their posts.",
+  };
+  router.render('admin/plugins/nodebb-plugin-category-posts/widget', {}, function (err, html) {
+    if (err) {
+      return callback(err);
+    }
+    widget.content = html;
+    widgets.push(widget);
+    callback(null, widgets);
+  });
 };
 
 plugin.renderWidget = function(widget, callback) {
-	/*var data = {
+	var data = {
 		templateData: {
 			config: {
 				relative_path: nconf.get('relative_path'),
@@ -62,34 +56,40 @@ plugin.renderWidget = function(widget, callback) {
 			uid: widget.uid,
 		},
 		cid: widget.data.cid || 0,
-	};*/
+	};
 
-	var data = "test";
-
-	var relative_path = nconf.get('url');
-
-	$.get(relative_path + '/api/categories', {}, function(categories) {
-		console.log("categories yo: " + JSON.stringify(categories));
-	});
-
-	res.render('partials/nodebb-plugin-category-posts/header', data);
-}
-
-function renderExternal(req, res, next) {
-	plugin.getCategories({
-		templateData: {}
-	}, function(err, data) {
+	plugin.getCategories(data, function(err, data) {
 		if (err) {
-			return next(err);
+			return callback(err);
 		}
 
-		data.templateData.relative_url = data.relative_url;
-		data.templateData.config = {
-			relative_path: nconf.get('url')
-		};
-
-		res.render('partials/nodebb-plugin-category-posts/header', data.templateData);
+		app.render('partials/nodebb-plugin-category-posts/header', data.templateData, function (err, html) {
+			if (err) {
+				return callback(err);
+			}
+			widget.html = html;
+			callback(null, widget);
+		});
 	});
 }
+
+plugin.getCategories = function(data, callback) {
+	var uid = data.req ? data.req.uid : 0;
+	var filterCid = data.cid;
+
+	if (err) {
+		return callback(err);
+	}
+
+	var i = 0;
+	var cids = [];
+	var finalTopics = [];
+
+	finalTopics = topics.topics;
+
+	data.templateData.topics = finalTopics;
+
+	callback(null, data);
+};
 
 module.exports = plugin;
