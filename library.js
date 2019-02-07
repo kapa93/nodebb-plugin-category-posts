@@ -52,7 +52,7 @@ plugin.defineWidgets = function(widgets, callback) {
 };
 
 plugin.renderWidget = function(widget, callback) {
-	var data = {
+	/*var data = {
 		templateData: {
 			config: {
 				relative_path: nconf.get('relative_path'),
@@ -62,7 +62,9 @@ plugin.renderWidget = function(widget, callback) {
 			uid: widget.uid,
 		},
 		cid: widget.data.cid || 0,
-	};
+	};*/
+
+	var data = "test";
 
 	var relative_path = nconf.get('url');
 
@@ -70,18 +72,7 @@ plugin.renderWidget = function(widget, callback) {
 		console.log("categories yo: " + JSON.stringify(categories));
 	});
 
-	categories.getCategoriesByPrivilege('cid:0:children', widget.uid, 'find', function(err, data) {
-		if (err) {
-			return callback(err);
-		}
-		router.render('partials/nodebb-plugin-category-posts/header', {
-			categories: data.templateData,
-			relative_path: nconf.get('relative_path')
-		}, function (err, html) {
-			widget.html = html;
-			callback(err, widget);
-		});
-	});
+	res.render('partials/nodebb-plugin-category-posts/header', data);
 }
 
 function renderExternal(req, res, next) {
