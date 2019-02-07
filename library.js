@@ -7,6 +7,7 @@ var categories = require.main.require('./src/categories');
 var validator = require.main.require('validator');
 var topics = require.main.require('./src/topics');
 var settings = require.main.require('./src/settings');
+var groups = require.main.require('./src/groups');
 var socketAdmin = require.main.require('./src/socket.io/admin');
 var plugin = module.exports;
 var router;
@@ -51,14 +52,35 @@ plugin.defineWidgets = function(widgets, callback) {
 };
 
 plugin.renderWidget = function(widget, callback) {
+	var data = {
+		templateData: {
+			config: {
+				relative_path: nconf.get('relative_path'),
+			},
+		},
+		req: {
+			uid: widget.uid,
+		},
+		cid: widget.data.cid || 0,
+	};
+
 	var relative_path = nconf.get('url');
 
-	$.get(relative_path + '/api/categories', {}, function(data) {
-		console.log("categories yo: " + JSON.stringify(data));
+	$.get(relative_path + '/api/categories', {}, function(categories) {
+		console.log("categories yo: " + JSON.stringify(categories));
 	});
 
-	router.render('partials/nodebb-plugin-category-posts/header', data, function(err, parsedTemplate) {
-	    console.log(parsedTemplate);
+	categories.getCategoriesByPrivilege('cid:0:children', widget.uid, 'find', function(err, data) {
+		if (err) {
+			return callback(err);
+		}
+		router.render('partials/nodebb-plugin-category-posts/header', {
+			categories: data.templateData,
+			relative_path: nconf.get('relative_path')
+		}, function (err, html) {
+			widget.html = html;
+			callback(err, widget);
+		});
 	});
 }
 
