@@ -3,7 +3,7 @@
 const controllers = require('./lib/controllers');
 var nconf = require.main.require('nconf');
 var async = require.main.require('async');
-
+var categories = require.main.require('./src/categories');
 var validator = require.main.require('validator');
 var topics = require.main.require('./src/topics');
 var settings = require.main.require('./src/settings');
@@ -52,17 +52,41 @@ plugin.defineWidgets = function(widgets, callback) {
 };
 
 plugin.renderWidget = function(widget, callback) {
-	router.render('partials/nodebb-plugin-category-posts/header', function (err, html) {
-		if (err) {
-			return callback(err);
-		}
-		widget.html = html;
-		callback(null, widget);
-	});
+
+  categories.getCategoryTopics({
+    cid: widget.req.params.cid || 1, // or whatever category ID you want.
+    set: 'cid:' + widget.req.params.cid + ':tids',
+    reverse: true,
+    start: 0,
+    stop: 10,
+    uid: widget.uid
+  }, function(err, result) {
+    widget.data.topics = result
+
+    router.render('partials/nodebb-plugin-category-posts/header', widget.data, function(err, html) {
+      translator.translate(html, function(translatedHTML) {
+        callback(err, translatedHTML)
+      })
+    })
+  })
+
 }
 
 function renderExternal(req, res, next) {
-	res.render('partials/nodebb-plugin-category-posts/header');
+	plugin.getCategories({
+		templateData: {}
+	}, function(err, data) {
+		if (err) {
+			return next(err);
+		}
+
+		data.templateData.relative_url = data.relative_url;
+		data.templateData.config = {
+			relative_path: nconf.get('url')
+		};
+
+		res.render('partials/nodebb-plugin-category-posts/header', data.templateData);
+	});
 }
 
 module.exports = plugin;
