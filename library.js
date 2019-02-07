@@ -52,24 +52,30 @@ plugin.defineWidgets = function(widgets, callback) {
 };
 
 plugin.renderWidget = function(widget, callback) {
+	var data = {
+		templateData: {
+			config: {
+				relative_path: nconf.get('relative_path'),
+			},
+		},
+		req: {
+			uid: widget.uid,
+		},
+		cid: widget.data.cid || 0,
+	};
 
-  categories.getCategoryTopics({
-    cid: widget.req.params.cid || 1, // or whatever category ID you want.
-    set: 'cid:' + widget.req.params.cid + ':tids',
-    reverse: true,
-    start: 0,
-    stop: 10,
-    uid: widget.uid
-  }, function(err, result) {
-    widget.data.topics = result
-
-    router.render('partials/nodebb-plugin-category-posts/header', widget.data, function(err, html) {
-      translator.translate(html, function(translatedHTML) {
-        callback(err, translatedHTML)
-      })
-    })
-  })
-
+	categories.getCategoriesByPrivilege('cid:0:children', widget.uid, 'find', function(err, data) {
+		if (err) {
+			return callback(err);
+		}
+		app.render('partials/nodebb-plugin-category-posts/header', {
+			categories: data.templateData,
+			relative_path: nconf.get('relative_path')
+		}, function (err, html) {
+			widget.html = html;
+			callback(err, widget);
+		});
+	});
 }
 
 function renderExternal(req, res, next) {
